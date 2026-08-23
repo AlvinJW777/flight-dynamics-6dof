@@ -8,7 +8,7 @@
 > Each question lists what a complete answer covers. That's a checklist, not the
 > answer. Writing it yourself is the entire point.
 
-**Status:** Units 0–6 complete. All seven outcomes answered.
+**Status:** Complete. All seven learning outcomes answered, 21 questions.
 
 Answers are written as **the shortest version that is still correct** — a few lines
 you can reproduce cold, not prose you'll skim. If you can say these from memory,
@@ -22,9 +22,12 @@ you own the unit. Depth sits in the source docstrings when you want it.
 
 ### 1.1 Why does the simulator use four different frames rather than one?
 
-**Your answer:**
-
-> _(write here)_
+> **Each frame exists because one thing is constant in it.**
+> NED — gravity is `[0,0,mg]`, always. Body — the inertia tensor, because the
+> aircraft doesn't deform. Wind — drag, which is *defined* as opposing the relative
+> wind. Stability — where the derivatives are published.
+>
+> You transform because each quantity has a natural home.
 
 <details><summary>A complete answer covers…</summary>
 
@@ -57,9 +60,13 @@ you own the unit. Depth sits in the source docstrings when you want it.
 
 ### 1.3 What are α and β, and why does one use `atan2` and the other `asin`?
 
-**Your answer:**
-
-> _(write here)_
+> α is the angle **in** the plane of symmetry; β is the angle **out of** it.
+>
+> `α = atan2(w, u)` — a **ratio of two components**, so atan2 keeps it right through
+> all four quadrants; backwards flight gives 180°, not 0°.
+> `β = asin(v/V)` — measured against **total speed**, not a ratio. Hence arcsine.
+>
+> **α is a ratio. β is a fraction of the whole.**
 
 <details><summary>A complete answer covers…</summary>
 
@@ -99,9 +106,12 @@ you own the unit. Depth sits in the source docstrings when you want it.
 
 ### 2.2 Why does the quaternion need renormalising if the kinematic equation conserves its norm?
 
-**Your answer:**
-
-> _(write here)_
+> **The equation conserves the norm. The integrator does not.**
+> Ω is skew-symmetric so `d/dt(qᵀq) = 0` exactly — in the maths. RK4 is an
+> approximation, so truncation error nudges q off the unit sphere.
+>
+> Because the equation is exact, **any drift is pure integration error** — a free
+> accuracy diagnostic rather than a nuisance.
 
 <details><summary>A complete answer covers…</summary>
 
@@ -163,9 +173,13 @@ you own the unit. Depth sits in the source docstrings when you want it.
 
 ### 3.3 Why must angular momentum be checked in the inertial frame, not the body frame?
 
-**Your answer:**
-
-> _(write here)_
+> With no external moment, **H** is constant **in the inertial frame**. Its
+> *body-frame components* still change, because the body rotates underneath it —
+> which is exactly what Euler's equation describes.
+>
+> **H stands still; the aircraft turns around it.**
+> A test asserting constant body-frame H would *fail on correct code*, which is why
+> there is a negative control for precisely that.
 
 <details><summary>A complete answer covers…</summary>
 
@@ -178,9 +192,13 @@ you own the unit. Depth sits in the source docstrings when you want it.
 
 ### 3.4 Why does dropping `Ixz` corrupt specific modes?
 
-**Your answer:**
-
-> _(write here)_
+> Symmetry about the xz plane makes `Ixy = Iyz = 0`. **`Ixz` survives** — and it is
+> the *inertial* coupling between roll and yaw.
+>
+> Drop it and roll and yaw decouple artificially. **Dutch roll IS coupled
+> yaw-and-roll**, so it is hit hardest; the spiral follows.
+>
+> The point is not that Ixz is non-zero — it is *what Ixz does*.
 
 <details><summary>A complete answer covers…</summary>
 
@@ -310,9 +328,19 @@ you own the unit. Depth sits in the source docstrings when you want it.
 
 ### 7.1 What have you verified, and what have you validated? Give one example of each from this project and say why they are different kinds of evidence.
 
-**Your answer:**
-
-> _(write here)_
+> **Verification** — did I solve the equations *right*? Numerical Jacobian against
+> Table IX-4's dimensional derivatives: all seven terms within 3%.
+>
+> **Validation** — did I solve the *right* equations? Eigenvalues against Table
+> IX-5's transfer-function factors: frequencies within 2%.
+>
+> **Why both are needed, from this project:** validation looked fine — the modes were
+> already within a few percent — while Xu, Zu and Mu were 14–60% wrong. Only
+> element-by-element verification against a *different table* found the missing Mach
+> derivatives, and the error being confined to one column identified *which* term was
+> missing.
+>
+> **Verification = maths. Validation = physics. One can pass while the other fails.**
 
 <details><summary>A complete answer covers…</summary>
 

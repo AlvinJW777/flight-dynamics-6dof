@@ -140,7 +140,7 @@ CR-2144's lateral transfer functions were not transcribed.
 | VALIDATION.md | ✅ |
 | DEFENCE_PACK.md — 21 questions | ✅ |
 | Interactive visualiser | ✅ `visualiser.html` |
-| Repository published | ✅ private; public is a deliberate later step |
+| Repository | ✅ published; visibility is a deliberate final step |
 | Technical report PDF | ⬜ **outstanding** |
 | Unit 7 — control system | ⬜ stretch, not attempted |
 
