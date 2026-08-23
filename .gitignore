@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Generated outputs (regenerate with scripts/)
+results/
+figures/
+
+# Large reference PDFs - cite them, don't vendor them
+references/*.pdf
+
+Thumbs.db
+.DS_Store

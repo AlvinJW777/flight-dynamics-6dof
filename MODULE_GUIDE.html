@@ -1,0 +1,434 @@
+<title>Six Degrees of Freedom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap">
+
+<style>
+:root{
+  --ground:#F1F4F6;--surface:#FFFFFF;--surface-2:#E9EDF1;
+  --ink:#0F161C;--ink-2:#4B5661;--ink-3:#6E7A85;
+  --rule:#D2D9DF;--rule-strong:#B4BEC6;
+  --accent:#1B5E8C;--accent-soft:#DDEAF3;
+  --warn:#A84A16;--warn-soft:#F7E9DE;
+  --good:#2C6549;--good-soft:#DFEDE6;
+  --shadow:rgba(15,22,28,.07);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0C1116;--surface:#131A21;--surface-2:#1A232B;
+  --ink:#E3E9ED;--ink-2:#A3AEB8;--ink-3:#7E8A94;
+  --rule:#26313A;--rule-strong:#38444E;
+  --accent:#5AA6D6;--accent-soft:#122736;
+  --warn:#DE9257;--warn-soft:#2E2117;
+  --good:#5FB68C;--good-soft:#15281F;
+  --shadow:rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --ground:#0C1116;--surface:#131A21;--surface-2:#1A232B;
+  --ink:#E3E9ED;--ink-2:#A3AEB8;--ink-3:#7E8A94;
+  --rule:#26313A;--rule-strong:#38444E;
+  --accent:#5AA6D6;--accent-soft:#122736;
+  --warn:#DE9257;--warn-soft:#2E2117;
+  --good:#5FB68C;--good-soft:#15281F;
+  --shadow:rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Serif",Georgia,serif;font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1240px;margin:0 auto}
+@media (max-width:900px){.shell{grid-template-columns:1fr}}
+.rail{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:34px 22px 60px;border-right:1px solid var(--rule);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:13px}
+@media (max-width:900px){.rail{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--rule)}}
+.rail-title{font-weight:700;font-size:13.5px;margin:0 0 4px}
+.rail-sub{color:var(--ink-3);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;margin:0 0 22px}
+.rail nav{display:flex;flex-direction:column;gap:1px}
+.rail nav a{display:flex;gap:9px;align-items:baseline;padding:5px 8px;border-radius:4px;color:var(--ink-2);text-decoration:none;line-height:1.35}
+.rail nav a:hover{background:var(--surface-2);color:var(--ink)}
+.rail nav a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.rail nav .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);min-width:20px;font-variant-numeric:tabular-nums}
+.rail .grp{margin-top:16px;padding:0 8px 4px;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+main{padding:34px 40px 120px;min-width:0}
+@media (max-width:900px){main{padding:28px 20px 80px}}
+.wrap{max-width:70ch}
+h1{font-family:"IBM Plex Sans",sans-serif;font-size:clamp(28px,4.2vw,40px);line-height:1.12;font-weight:700;letter-spacing:-.02em;margin:0 0 10px;text-wrap:balance}
+h2{font-family:"IBM Plex Sans",sans-serif;font-size:23px;font-weight:600;letter-spacing:-.01em;line-height:1.22;margin:0 0 14px;text-wrap:balance}
+h3{font-family:"IBM Plex Sans",sans-serif;font-size:16.5px;font-weight:600;margin:30px 0 10px;text-wrap:balance}
+h4{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin:26px 0 8px}
+p{margin:0 0 15px}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+strong{font-weight:600}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em}
+code{background:var(--surface-2);padding:1px 5px;border-radius:3px}
+.lede{font-size:18.5px;line-height:1.55;color:var(--ink-2);margin-bottom:26px}
+.eyebrow{font-family:"IBM Plex Sans",sans-serif;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+header.masthead{border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:32px}
+.meta-row{display:flex;flex-wrap:wrap;gap:22px;font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;color:var(--ink-2);margin-top:16px}
+.meta-row div{display:flex;flex-direction:column;gap:1px}
+.meta-row .k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.meta-row .v{font-weight:500;color:var(--ink)}
+section.unit{border-top:1px solid var(--rule);padding-top:30px;margin-top:44px;scroll-margin-top:16px}
+.unit-head{display:flex;gap:16px;align-items:baseline;margin-bottom:6px}
+.unit-num{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--surface);background:var(--accent);padding:3px 8px;border-radius:3px;flex:none}
+.unit-time{font-family:"IBM Plex Sans",sans-serif;font-size:12px;color:var(--ink-3);margin-left:auto;flex:none;font-variant-numeric:tabular-nums}
+.box{border:1px solid var(--rule);background:var(--surface);border-radius:5px;padding:16px 18px;margin:20px 0;box-shadow:0 1px 2px var(--shadow)}
+.box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+.box .label{font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:8px;display:block}
+.box.calc{border-left:3px solid var(--accent)}.box.calc .label{color:var(--accent)}
+.box.trap{background:var(--warn-soft);border-left:3px solid var(--warn)}.box.trap .label{color:var(--warn)}
+.box.deliver{background:var(--good-soft);border-left:3px solid var(--good)}.box.deliver .label{color:var(--good)}
+.box.defend{background:var(--accent-soft);border-left:3px solid var(--accent)}.box.defend .label{color:var(--accent)}
+.eq{font-family:"IBM Plex Mono",monospace;font-size:13.5px;background:var(--surface-2);border-radius:4px;padding:12px 14px;margin:14px 0;overflow-x:auto;line-height:1.8}
+.eq .c{color:var(--ink-3)}
+.eq .r{color:var(--accent);font-weight:600}
+.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--rule);border-radius:5px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:"IBM Plex Sans",sans-serif;font-size:13.5px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+ul,ol{margin:0 0 15px;padding-left:22px}
+li{margin-bottom:6px}
+li::marker{color:var(--ink-3)}
+ul.tight li,ol.tight li{margin-bottom:3px}
+.res{list-style:none;padding:0;margin:14px 0}
+.res li{padding:9px 0;border-bottom:1px solid var(--rule);margin:0;display:flex;gap:12px;align-items:baseline}
+.res li:last-child{border-bottom:0}
+.res .tag{font-family:"IBM Plex Mono",monospace;font-size:10px;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--rule-strong);border-radius:3px;padding:1px 5px;flex:none;min-width:62px;text-align:center}
+.res .body{font-size:14.5px;line-height:1.5}
+.res .note{display:block;color:var(--ink-3);font-size:13px;margin-top:2px}
+.footnote{font-size:14px;color:var(--ink-3);border-top:1px solid var(--rule);padding-top:18px;margin-top:44px}
+</style>
+
+<div class="shell">
+<aside class="rail">
+  <p class="rail-title">Six Degrees of Freedom</p>
+  <p class="rail-sub">Self-directed module</p>
+  <nav>
+    <a href="#brief"><span class="n">—</span><span>Module brief</span></a>
+    <a href="#why"><span class="n">—</span><span>Why this, not CFD</span></a>
+    <a href="#vv"><span class="n">—</span><span>The V&amp;V strategy</span></a>
+    <a href="#transfer"><span class="n">—</span><span>Why this pays at work</span></a>
+    <div class="grp">Units</div>
+    <a href="#u0"><span class="n">00</span><span>Setup &amp; the benchmark</span></a>
+    <a href="#u1"><span class="n">01</span><span>Frames &amp; rotations</span></a>
+    <a href="#u2"><span class="n">02</span><span>Equations of motion</span></a>
+    <a href="#u3"><span class="n">03</span><span>Atmosphere, aero, thrust</span></a>
+    <a href="#u4"><span class="n">04</span><span>Trim</span></a>
+    <a href="#u5"><span class="n">05</span><span>Linearisation</span></a>
+    <a href="#u6"><span class="n">06</span><span>Modes &amp; validation</span></a>
+    <a href="#u7"><span class="n">07</span><span>Control (stretch)</span></a>
+    <a href="#u8"><span class="n">08</span><span>Write-up</span></a>
+    <div class="grp">Reference</div>
+    <a href="#milestones"><span class="n">—</span><span>Milestones</span></a>
+    <a href="#library"><span class="n">—</span><span>Sources</span></a>
+    <a href="#defend"><span class="n">—</span><span>Defence questions</span></a>
+  </nav>
+</aside>
+
+<main>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Portfolio Project 02 · Flight Mechanics</p>
+  <h1>Six Degrees of Freedom</h1>
+  <p class="lede">Build a nonlinear rigid-body aircraft simulator from the equations of motion, trim it, linearise it, extract its natural modes — and show they match forty-year-old NASA flight data.</p>
+  <div class="meta-row">
+    <div><span class="k">Tool</span><span class="v">Python — no licence, no caps</span></div>
+    <div><span class="k">Effort</span><span class="v">30–35 h</span></div>
+    <div><span class="k">Benchmark</span><span class="v">NASA CR-2144</span></div>
+    <div><span class="k">Model</span><span class="v">AI-assisted; you own the judgement</span></div>
+  </div>
+</header>
+
+<section id="brief">
+<h2>Module brief</h2>
+<p>You are going to write, from the equations of motion up, a simulator that flies an aircraft in six degrees of freedom. Then you will find the control settings that hold it in steady flight, linearise the nonlinear model about that condition, pull the eigenvalues out of the resulting state matrix, and identify the five classical modes hiding in them — short period, phugoid, dutch roll, roll subsidence, spiral.</p>
+<p>Then you will show your numbers match NASA's.</p>
+
+<h4>Learning outcomes</h4>
+<ol class="tight">
+  <li>Define and transform between Earth, body, stability and wind axes without confusing yourself.</li>
+  <li>Explain why quaternions are used for attitude and what specifically fails without them.</li>
+  <li>Derive and implement the 6-DOF rigid-body equations, including the rotating-frame terms.</li>
+  <li>Solve trim as a nonlinear root-finding problem, and say what it means when it fails to converge.</li>
+  <li>Linearise a nonlinear system numerically and know how to choose the perturbation size.</li>
+  <li>Extract natural frequency and damping from eigenvalues, and identify which mode is which.</li>
+  <li>Separate verification from validation and evidence each independently.</li>
+</ol>
+</section>
+
+<section id="why">
+<h2>Why this, and not the CFD project</h2>
+<p>Indicative UK market counts: ~1,783 aerospace engineer roles, ~152 CFD engineer, ~70 aerodynamics engineer. Aerodynamics is about 4% of the market, contested by aero MScs and PhDs — and "did a CFD project on an aerofoil in Ansys" is the most common line on an aerospace graduate CV. You had already done a version at university.</p>
+<p>This project is harder in the ways that count. <strong>Nothing does the work for you.</strong> There is no solver to click through: you write the equations of motion, you get the sign conventions right or the aircraft flies backwards, you solve trim yourself. And it compounds what already makes you unusual — the estimation and numerical-methods depth from the dissertation, the V&amp;V discipline, the Python.</p>
+<p>Two projects that tell one story — <em>"I model dynamic systems and I prove my models are right"</em> — beat four that tell none.</p>
+</section>
+
+<section id="vv">
+<h2>The verification and validation strategy</h2>
+<p>This is the most important design decision in the project, so it comes before any code. It mirrors what made the asteroid work defensible: two independent references answering two different questions.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Question</th><th>Answered by</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td>Did I implement the maths correctly?</td><td>Your numerically-linearised model must reproduce the <em>analytical</em> linear model built directly from the published derivatives.</td><td><strong>Verification</strong></td></tr>
+<tr><td>Does the model describe a real aircraft?</td><td>Your computed eigenvalues must match the mode frequencies and damping tabulated in NASA CR-2144.</td><td><strong>Validation</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>Why CR-2144 is close to ideal.</strong> Heffley and Jewell's <em>Aircraft Handling Qualities Data</em> (NASA CR-2144, December 1972) publishes, for ten aircraft across ten flight conditions: mass and inertia, aerodynamic derivatives, control characteristics — <em>and</em> the resulting transfer functions and handling-qualities parameters. It gives you both the inputs and the reference outputs.</p>
+
+<p>That is exactly the structure that made the CFD benchmark valuable, and it lets you separate two failures that otherwise look identical:</p>
+<ul class="tight">
+  <li>Your linearised A matrix disagrees with the analytical one → <strong>your implementation is wrong.</strong> Sign convention, a missing rotating-frame term, a units error.</li>
+  <li>It agrees, but the eigenvalues miss CR-2144's modes → your implementation is fine and the <strong>model or the data</strong> is the limitation. That is a result, not a mistake.</li>
+</ul>
+
+<div class="box trap">
+<span class="label">Pick the aircraft deliberately</span>
+<p>Start with the <strong>Boeing 747</strong>. It is in CR-2144, it is the standard worked example in Etkin &amp; Reid and most flight dynamics texts, and it is therefore cross-referenced in more places than anything else — so when your phugoid damping looks odd you have several independent sources to check against, not one. Exotic choices leave you alone with your bug.</p>
+</div>
+</section>
+
+<section id="transfer">
+<h2>Why this pays at work</h2>
+<div class="tw">
+<table>
+<thead><tr><th>Skill</th><th>Where it lands at TÜV SÜD</th></tr></thead>
+<tbody>
+<tr><td>Verification vs validation, evidenced separately</td><td>The conceptual core of testing and certification — the same distinction as calibration vs conformity assessment.</td></tr>
+<tr><td>Linearisation and stability analysis</td><td>The language of every control and dynamics conversation. Poles, damping, natural frequency generalise far beyond aircraft.</td></tr>
+<tr><td>Working from a published standard/dataset</td><td>Reading a document and implementing exactly what it specifies, clause by clause.</td></tr>
+<tr><td>Nonlinear solving and convergence diagnosis</td><td>Knowing why a solver failed, rather than tweaking until it stops complaining.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="unit" id="u0">
+<div class="unit-head"><span class="unit-num">00</span><h2>Setup &amp; the benchmark</h2><span class="unit-time">3–4 h</span></div>
+<p>Reuse the asteroid repository structure exactly — <code>src/</code>, <code>tests/</code>, <code>scripts/</code>, the assumptions register, the defence pack, the golden-reference harness. That consistency is itself a signal, and it means you start with the scaffold already proven.</p>
+<p>Then get CR-2144 and read the sections for your chosen aircraft and flight condition <em>before</em> writing code. Extract into a config file: mass, inertia tensor, reference geometry, flight condition, and every stability derivative. Record page numbers — you will need them in the report.</p>
+<div class="box deliver">
+<span class="label">Deliverable</span>
+<p>Repository scaffold, <code>SPECIFICATION.md</code>, and a machine-readable aircraft data file with every value traced to a page in CR-2144.</p>
+</div>
+</section>
+
+<section class="unit" id="u1">
+<div class="unit-head"><span class="unit-num">01</span><h2>Frames &amp; rotations</h2><span class="unit-time">4–5 h</span></div>
+<p>Almost every bug in a 6-DOF simulator is a frame or sign error, and they are hard to find because the aircraft still flies — just wrongly. Get this unit right and the rest is bookkeeping.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Frame</th><th>Axes</th><th>Used for</th></tr></thead>
+<tbody>
+<tr><td>Earth / NED</td><td>North, East, Down</td><td>Position, navigation. Treated as inertial.</td></tr>
+<tr><td>Body</td><td>Nose, right wing, down</td><td>Equations of motion, inertia tensor, rate gyros</td></tr>
+<tr><td>Wind</td><td>Along relative wind</td><td>Lift and drag are defined here</td></tr>
+<tr><td>Stability</td><td>Body rotated by α</td><td>Stability derivatives are usually quoted here</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>Why quaternions</h4>
+<p>Euler angles have a singularity at θ = ±90°: at vertical pitch, roll and yaw become indistinguishable and the kinematic equations divide by cos θ → 0. That is gimbal lock. A quaternion has no singularity and needs four numbers with one constraint (unit norm) rather than three with a hole in them.</p>
+
+<div class="box defend">
+<span class="label">Checkpoint — tests that must pass before Unit 2</span>
+<ul class="tight">
+<li>Direction cosine matrix is orthogonal: <span class="mono">C·Cᵀ = I</span> to 10⁻¹⁴</li>
+<li><span class="mono">det(C) = +1</span> — a rotation, not a reflection. A determinant of −1 means you have mirrored the aircraft.</li>
+<li>Quaternion → DCM → quaternion round-trips to itself</li>
+<li>Quaternion norm stays 1 through 10⁶ integration steps (renormalise, and record how much drift you were correcting)</li>
+<li>Known rotations: 90° yaw maps body-x to Earth-y; 90° pitch maps body-x to Earth-down</li>
+</ul>
+</div>
+</section>
+
+<section class="unit" id="u2">
+<div class="unit-head"><span class="unit-num">02</span><h2>Equations of motion</h2><span class="unit-time">6–7 h</span></div>
+<p>Twelve states: three velocities, three body rates, four quaternion components, three positions.</p>
+
+<div class="eq">
+<span class="c">force, body axes — note the rotating-frame coupling terms</span><br>
+u̇ = rv − qw − g·sinθ + F<sub>x</sub>/m<br>
+v̇ = pw − ru + g·cosθ·sinφ + F<sub>y</sub>/m<br>
+ẇ = qu − pv + g·cosθ·cosφ + F<sub>z</sub>/m<br><br>
+<span class="c">moment — the ω × Iω term is where sign errors hide</span><br>
+ω̇ = I⁻¹ · ( M − ω × (I·ω) )<br><br>
+<span class="c">attitude kinematics</span><br>
+q̇ = ½ · Ω(ω) · q<br><br>
+<span class="c">navigation</span><br>
+ṗ<sub>NED</sub> = C<sub>body→NED</sub> · v<sub>body</sub>
+</div>
+
+<p>The <span class="mono">rv − qw</span> terms are not optional extras — they are what makes the body frame non-inertial. Omit them and the aircraft will still fly, just not like an aircraft. This is the single most common silent error in a first 6-DOF implementation.</p>
+
+<div class="box defend">
+<span class="label">Checkpoint — physics that must hold regardless of implementation</span>
+<ul class="tight">
+<li><strong>Newton's first law:</strong> zero forces and moments → velocity constant, attitude constant, forever.</li>
+<li><strong>Free fall:</strong> gravity only → downward acceleration exactly <span class="mono">g</span>, no rotation.</li>
+<li><strong>Angular momentum:</strong> no external moments → <span class="mono">|I·ω|</span> conserved in the inertial frame.</li>
+<li><strong>Energy:</strong> no thrust, no drag → total energy conserved to integrator tolerance over a ballistic arc.</li>
+<li><strong>Dzhanibekov / intermediate axis:</strong> spin about the intermediate principal axis is unstable, the other two stable. A genuinely searching test of the <span class="mono">ω × Iω</span> term, and it either works or it very obviously does not.</li>
+</ul>
+</div>
+</section>
+
+<section class="unit" id="u3">
+<div class="unit-head"><span class="unit-num">03</span><h2>Atmosphere, aerodynamics, thrust</h2><span class="unit-time">4–5 h</span></div>
+<p>ISA atmosphere: temperature lapse to 11 km, isothermal above, giving density and speed of sound as functions of altitude. Validate against the published ISA table at 0, 5, 11 and 20 km — it is tabulated everywhere and agreement should be to four significant figures.</p>
+<p>Aerodynamics from CR-2144's stability derivatives, built as a linear expansion about the reference condition. Thrust as a simple model — that is honest at this fidelity, and you state it.</p>
+<div class="box trap">
+<span class="label">Derivative conventions will cost you a day</span>
+<p>Stability derivatives are quoted in several conventions: dimensional or non-dimensional, per radian or per degree, in stability axes or body axes, and with rate derivatives sometimes normalised by <span class="mono">c/2V</span> or <span class="mono">b/2V</span>. CR-2144 states which it uses — <strong>read that section, do not assume.</strong> A factor of 57.3 or of <span class="mono">2V/c</span> in the wrong place produces a model that trims fine and has completely wrong modes.</p>
+</div>
+</section>
+
+<section class="unit" id="u4">
+<div class="unit-head"><span class="unit-num">04</span><h2>Trim</h2><span class="unit-time">4–5 h</span></div>
+<p>Trim is the flight condition where the aircraft is in equilibrium — accelerations zero, so it holds its state indefinitely. For straight and level flight, find the angle of attack, elevator deflection and throttle that make <span class="mono">u̇ = ẇ = q̇ = 0</span>.</p>
+<p>That is a nonlinear root-finding problem in three unknowns. Use <code>scipy.optimize.root</code> or a least-squares cost.</p>
+
+<div class="box defend">
+<span class="label">Checkpoint</span>
+<ul class="tight">
+<li>Residual accelerations below 10⁻¹⁰ — not "small", converged.</li>
+<li><strong>Propagate the trimmed state for 60 s with controls fixed and confirm nothing moves.</strong> This is the real test: a trim that is not actually an equilibrium will drift, and this catches it immediately.</li>
+<li>Trimmed α is physically sensible — a few degrees in cruise, not 30, not negative.</li>
+<li>Lift ≈ weight, thrust ≈ drag, to within a fraction of a percent.</li>
+</ul>
+</div>
+<div class="box trap">
+<span class="label">When trim will not converge</span>
+<p>Do not just tighten tolerances or change the initial guess until something comes out. Non-convergence usually means the flight condition is not achievable with the model as built — insufficient thrust, or the aero model extrapolated outside its valid range. <strong>Diagnose it, do not brute-force it.</strong> Understanding why a solver failed is worth more in an interview than the answer it eventually gave.</p>
+</div>
+</section>
+
+<section class="unit" id="u5">
+<div class="unit-head"><span class="unit-num">05</span><h2>Linearisation</h2><span class="unit-time">4–5 h</span></div>
+<p>Perturb each state and control in turn about trim, measure the response, and assemble the Jacobians <span class="mono">A = ∂f/∂x</span> and <span class="mono">B = ∂f/∂u</span>. Use central differences.</p>
+
+<div class="box calc">
+<span class="label">Choosing the perturbation size</span>
+<p>The classic trade-off, and worth understanding rather than copying. Too large and you capture nonlinearity; too small and floating-point cancellation dominates. For central differences the truncation error goes as <span class="mono">h²</span> and the round-off as <span class="mono">ε/h</span>, so the optimum is near</p>
+<div class="eq">h ≈ ε<sup>1/3</sup> ≈ (2.2×10⁻¹⁶)<sup>1/3</sup> ≈ <span class="r">6×10⁻⁶</span> × (state scale)</div>
+<p>Scale per state — a perturbation appropriate for a velocity in m/s is wrong for a quaternion component. <strong>Demonstrate this:</strong> sweep <span class="mono">h</span> over several decades and plot the error against the analytical Jacobian. You will see the V-shaped curve with truncation on one side and round-off on the other, and the minimum where theory says it should be. That plot is worth a paragraph in the report.</p>
+</div>
+
+<p>Then decouple: longitudinal states <span class="mono">(u, w, q, θ)</span> and lateral-directional <span class="mono">(v, p, r, φ)</span>. For a symmetric aircraft in symmetric flight these separate almost exactly — and <em>how nearly</em> they separate is itself a check on your implementation.</p>
+
+<div class="box defend">
+<span class="label">Checkpoint — this is the verification gate</span>
+<p>Build the analytical A matrix directly from CR-2144's dimensional derivatives, independently of your simulator. Your numerically-linearised A must reproduce it element by element to within a fraction of a percent. If it does not, the disagreement tells you exactly which term is wrong — the matrix element points straight at the equation.</p>
+</div>
+</section>
+
+<section class="unit" id="u6">
+<div class="unit-head"><span class="unit-num">06</span><h2>Modes &amp; validation</h2><span class="unit-time">4–5 h</span></div>
+<p>Eigenvalues of A. For each complex pair, natural frequency and damping ratio:</p>
+<div class="eq">ω<sub>n</sub> = |λ|,&nbsp;&nbsp;&nbsp; ζ = −Re(λ) / |λ|</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>Mode</th><th>Axis</th><th>Character</th><th>Physical meaning</th></tr></thead>
+<tbody>
+<tr><td>Short period</td><td>Longitudinal</td><td>Fast oscillation, moderately damped</td><td>Pitch rotation at near-constant speed</td></tr>
+<tr><td>Phugoid</td><td>Longitudinal</td><td>Slow oscillation, lightly damped</td><td>Exchange of kinetic and potential energy</td></tr>
+<tr><td>Dutch roll</td><td>Lateral</td><td>Oscillation, lightly damped</td><td>Coupled yaw and roll</td></tr>
+<tr><td>Roll subsidence</td><td>Lateral</td><td>Fast real root</td><td>Roll rate damping out</td></tr>
+<tr><td>Spiral</td><td>Lateral</td><td>Very slow real root</td><td>Often slightly divergent — and that is normal</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box calc">
+<span class="label">An independent check you can do on paper</span>
+<p>Lanchester's phugoid approximation says the phugoid frequency depends only on trim speed:</p>
+<div class="eq">ω<sub>n</sub> ≈ √2 · g / V&nbsp;&nbsp;&nbsp;→&nbsp;&nbsp;&nbsp; period T ≈ 2πV/(√2·g) ≈ <span class="r">0.45 · V</span> seconds</div>
+<p>So an aircraft trimmed at 250 m/s should show a phugoid period near 113 s. This drops out of energy exchange alone — no derivatives, no matrix — so it is a genuinely independent check on your eigenvalue extraction. If your phugoid period is wildly off this, look for the error before comparing to anything else.</p>
+</div>
+
+<div class="box defend">
+<span class="label">Validation</span>
+<p>Compare each mode's frequency and damping against CR-2144's tabulated values. Report the percentage difference per mode. <strong>Then explain the disagreements</strong> — candidate causes include the quasi-steady aerodynamic assumption, neglected unsteady derivatives, flexible-airframe effects absent from a rigid-body model, and the accuracy of the derivatives themselves.</p>
+<p>Expect the phugoid to agree worst. It is lightly damped and sensitive to drag modelling, so a few percent on drag moves it a lot. Saying that in advance, and then showing it, reads far better than discovering it.</p>
+</div>
+</section>
+
+<section class="unit" id="u7">
+<div class="unit-head"><span class="unit-num">07</span><h2>Control — stretch</h2><span class="unit-time">4–6 h</span></div>
+<p>Only if Units 0–6 are finished and documented. A pitch-attitude hold and altitude hold, tuned against the modes you just identified — which is the point: you are no longer guessing gains, you are placing them relative to known dynamics. Then a discrete gust response.</p>
+<div class="box trap">
+<span class="label">Do not start this until the rest is done</span>
+<p>Your own plan is roughly 2× over on time. A complete, validated, well-documented simulator with no controller beats a half-documented one with a PID bolted on.</p>
+</div>
+</section>
+
+<section class="unit" id="u8">
+<div class="unit-head"><span class="unit-num">08</span><h2>Write-up</h2><span class="unit-time">4–5 h</span></div>
+<p>Same document set as the asteroid project. The three figures that carry it:</p>
+<ol class="tight">
+<li><strong>Pole map</strong> — your eigenvalues against CR-2144's, on the complex plane, all five modes labelled.</li>
+<li><strong>Perturbation-size sweep</strong> — the V-curve showing truncation and round-off error, with the theoretical optimum marked.</li>
+<li><strong>Time response</strong> — the aircraft excited in each mode, showing the character you claim (fast damped pitch, slow energy exchange, coupled yaw-roll).</li>
+</ol>
+</section>
+
+<section class="unit" id="milestones">
+<h2>Milestones</h2>
+<div class="tw">
+<table>
+<thead><tr><th class="num">M</th><th>Gate</th><th>Passes when</th><th class="num">Cumulative</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Frames</td><td>Rotation tests pass; CR-2144 data extracted and traced to page numbers.</td><td class="num">~8 h</td></tr>
+<tr><td class="num">2</td><td>It flies</td><td>Conservation tests pass; the intermediate-axis test behaves correctly.</td><td class="num">~15 h</td></tr>
+<tr><td class="num">3</td><td>It trims</td><td>Residuals below 10⁻¹⁰; state holds for 60 s with controls fixed.</td><td class="num">~20 h</td></tr>
+<tr><td class="num">4</td><td>Verification</td><td>Numerical A matrix reproduces the analytical one element by element.</td><td class="num">~25 h</td></tr>
+<tr><td class="num">5</td><td>Validation</td><td>All five modes identified; frequencies and damping compared to CR-2144 with differences explained.</td><td class="num">~30 h</td></tr>
+<tr><td class="num">6</td><td>Publishable</td><td>Repo public, report written, defence pack answered.</td><td class="num">~35 h</td></tr>
+</tbody>
+</table>
+</div>
+<div class="box trap">
+<span class="label">Milestone 3 is the real gate</span>
+<p>A trimmed state that will not hold for 60 seconds is not trimmed, and everything downstream — linearisation, eigenvalues, validation — is computed about a point that does not exist. Cheapest error detector in the project. Use it before believing anything else.</p>
+</div>
+</section>
+
+<section class="unit" id="library">
+<h2>Sources</h2>
+<ul class="res">
+<li><span class="tag">Primary</span><span class="body"><a href="https://www.robertheffley.com/docs/Data/NASA%20CR-2144--Heffley--Aircraft%20Handling%20Qualities%20Data.pdf">NASA CR-2144 — Heffley &amp; Jewell, <em>Aircraft Handling Qualities Data</em> (1972)</a><span class="note">Mass, inertia, derivatives, transfer functions and handling-qualities parameters for 10 aircraft across 10 flight conditions. Your inputs and your reference outputs. Also on <a href="https://ntrs.nasa.gov/citations/19730003312">NTRS</a>.</span></span></li>
+<li><span class="tag">Code</span><span class="body"><a href="https://ntrs.nasa.gov/api/citations/20030013626/downloads/20030013626.pdf">NASA/TM-2003-212145 — <em>A Collection of Nonlinear Aircraft Simulations in MATLAB</em></a><span class="note">Reference implementations. Useful for checking structure when your model misbehaves.</span></span></li>
+<li><span class="tag">Data</span><span class="body"><a href="https://www.engineering.iastate.edu/~shermanp/AERE355/lectures/Nelson%20APPENDIX%20B.pdf">Nelson, <em>Flight Stability and Automatic Control</em> — Appendix B</a><span class="note">Geometric, mass and aerodynamic characteristics for several aircraft. A useful cross-check on CR-2144.</span></span></li>
+<li><span class="tag">Stretch</span><span class="body"><a href="https://ntrs.nasa.gov/citations/19800005879">NASA TP-1538 — Nguyen et al. (1979), F-16 nonlinear aerodynamic data</a><span class="note">Nonlinear tables, α from −20° to 90°. The basis of the Stevens &amp; Lewis model. Only after CR-2144 works.</span></span></li>
+</ul>
+</section>
+
+<section class="unit" id="defend">
+<h2>Defence questions</h2>
+<ol class="tight">
+<li>Why quaternions rather than Euler angles, and what exactly fails without them?</li>
+<li>What are the <span class="mono">rv − qw</span> terms and where do they come from?</li>
+<li>What does trim mean physically, and how did you prove you had actually reached it?</li>
+<li>How did you choose the perturbation size for linearisation?</li>
+<li>Why do longitudinal and lateral dynamics decouple, and how nearly did they in your model?</li>
+<li>Explain the phugoid physically, without equations.</li>
+<li>Why is the spiral mode often unstable, and why is that acceptable?</li>
+<li>What did you verify against, and what did you validate against? Why are those different?</li>
+<li>Which mode agreed worst with CR-2144, and why would you expect that?</li>
+<li>What is the biggest limitation of a rigid-body quasi-steady model?</li>
+<li>You did not do the arithmetic by hand. How do you know it is right?</li>
+<li>If I deleted the code, could you derive the equations of motion on a whiteboard?</li>
+</ol>
+</section>
+
+<p class="footnote">Module handbook for Portfolio Project 02. Replaces the parked CFD module on the evidence in <em>Why this, not CFD</em>. All external links verified August 2026.</p>
+
+</div>
+</main>
+</div>
