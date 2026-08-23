@@ -8,7 +8,7 @@
 > Each question lists what a complete answer covers. That's a checklist, not the
 > answer. Writing it yourself is the entire point.
 
-**Status:** Units 0–2 complete, outcomes 1–3 answered.
+**Status:** Units 0–6 complete. All seven outcomes answered.
 
 Answers are written as **the shortest version that is still correct** — a few lines
 you can reproduce cold, not prose you'll skim. If you can say these from memory,
@@ -193,29 +193,120 @@ you own the unit. Depth sits in the source docstrings when you want it.
 
 ---
 
-## Outcome 4 — Trim *(unit not started)*
+## Outcome 4 — Trim
 
 ### 4.1 What does trim mean physically, and how did you prove you reached it?
+
+> **Trim = every acceleration is zero**, so the aircraft holds the state forever
+> with the controls fixed.
+>
+> Three unknowns — α, elevator, throttle — driving three residuals — u̇, ẇ, q̇ —
+> to zero. No closed form, because gravity rotates with attitude and the aero
+> forces rotate from wind to body axes. So it's a **nonlinear root-find**.
+>
+> `γ = θ − α = 0` for level flight. That constraint is what makes three unknowns
+> match three equations instead of four.
+>
+> **Proof, in three parts:** residual 1×10⁻¹⁶; propagated 60 s with controls fixed
+> and *nothing moved*; and a negative control — a state 10% fast *does* drift, so
+> the hold test actually has power.
+
 ### 4.2 What does it mean when trim fails to converge, and why is tightening the tolerance the wrong response?
 
+> It means **the condition isn't achievable with the model as built** — not enough
+> thrust, or the linear aero extrapolated past where it's valid.
+>
+> Tightening the tolerance or nudging the guess until something emerges hides a
+> real finding. The solver was right to fail; the question is why.
+
 ---
 
-## Outcome 5 — Linearisation *(unit not started)*
+## Outcome 5 — Linearisation
 
-### 5.1 How did you choose the perturbation size, and what happens either side of that choice?
-### 5.2 Why does a fixed-step integrator matter more here than anywhere else in the project?
+### 5.1 How did you choose the perturbation size, and what happens either side?
+
+> Central differences carry **truncation error ~h²** and **round-off ~ε/h**.
+> Their sum minimises near **h ≈ ε^(1/3) × (the state's own scale)**.
+>
+> For u, scale 84 m/s → predicted 5.1×10⁻⁴. Measured minimum: 1×10⁻³. Within 2×.
+>
+> Scale **per state** — a step right for m/s is meaningless for radians.
+>
+> **The caveat I found by measuring:** the V-shape only appears where the function
+> is genuinely nonlinear in that variable. In q the dynamics are nearly linear, so
+> there's no truncation branch — the curve falls and flattens. Expecting a V there
+> and "fixing" the code would be chasing a phantom.
+
+### 5.2 Why does a fixed-step integrator matter more here than anywhere else?
+
+> An adaptive solver **chooses its step based on the state**. Perturb the state by
+> 10⁻⁶ and it may take different steps — injecting noise at exactly the scale
+> you're trying to measure.
+
+### 5.3 Why linearise in Euler angles when the simulator uses quaternions?
+
+> A quaternion is 4 components under 1 constraint, so linearising in it gives a
+> redundant direction and a **spurious zero eigenvalue** you'd have to identify
+> and discard.
+>
+> At trim we're far from gimbal lock, so the Euler chart is well conditioned and
+> gives exactly 9 dynamic states. **The physics is untouched** — it's a change of
+> coordinates for taking a derivative, not a change of model.
 
 ---
 
-## Outcome 6 — Modes *(unit not started)*
+## Outcome 6 — Modes
 
-### 6.1 Extract ωₙ and ζ from a complex eigenvalue, and explain what each means physically.
+### 6.1 Extract ωₙ and ζ from an eigenvalue, and say what each means.
+
+> `λ = −ζωₙ ± jωₙ√(1−ζ²)`, so **ωₙ = |λ|** and **ζ = −Re(λ)/|λ|**.
+>
+> ωₙ is how *fast*, ζ is how *quickly it dies*. ζ < 0 → divergent.
+
 ### 6.2 Explain the phugoid without equations.
-### 6.3 Why is the spiral mode often unstable, and why is that acceptable in a certificated aircraft?
+
+> **A slow trade of speed for height.** Nose drops → speeds up → lift rises →
+> climbs → slows → nose drops again.
+>
+> Energy sloshing between kinetic and potential. Barely damped because only *drag*
+> removes energy — hence ζ = 0.02 and a 50-second period here.
+>
+> That's also why it's the mode our model matches worst: it's set almost entirely
+> by drag, so a few percent on CD moves it a lot.
+
+### 6.3 Why is the spiral often unstable, and why is that acceptable?
+
+> Bank slightly → sideslip → **dihedral (Cl_β) rolls you level** while
+> **weathercock (Cn_β) yaws you into the turn, which rolls you further in.**
+> Whichever wins decides stability.
+>
+> Acceptable because it's *slow* — τ = 27 s here. A pilot corrects it without
+> noticing. Certification limits time-to-double, not the sign.
 
 ---
 
-## Outcome 7 — Verification vs validation *(ongoing)*
+## Outcome 7 — Verification vs validation
+
+### 7.1 What did you verify, what did you validate, and why are they different?
+
+> **Verification** — numerical Jacobian against Table IX-4's dimensional
+> derivatives. *"Did I code the maths right?"* All seven longitudinal terms within
+> 3%.
+>
+> **Validation** — eigenvalues against Table IX-5's transfer-function factors.
+> *"Does the model describe a real aircraft?"* Frequencies within 2%.
+>
+> **They caught different things, and that's the whole point.** Validation looked
+> fine — the modes were already within a few percent — while Xu, Zu and Mu were
+> 14–60% wrong. Only element-by-element verification found the missing Mach
+> derivatives, because the error was confined to one column of the matrix.
+>
+> One reference alone could not have told me whether a discrepancy meant a coding
+> error or a modelling limitation.
+
+---
+
+## Outcome 7 — Verification vs validation, further reading
 
 ### 7.1 What have you verified, and what have you validated? Give one example of each from this project and say why they are different kinds of evidence.
 

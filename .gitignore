@@ -8,7 +8,7 @@ venv/
 
 # Generated outputs (regenerate with scripts/)
 results/
-figures/
+
 
 # Large reference PDFs - cite them, don't vendor them
 references/*.pdf
