@@ -162,8 +162,8 @@ references/           CR-2144 (not vendored — cited)
 - **Derivatives were transcribed from a 1972 scan.** The text layer is unusable, so
   values were read from page images. Every one is cross-checked against physics rather
   than against itself (lift = weight to 0.20%, Mach reconciles to 0.00%, dynamic
-  pressure to 0.38%), but `Cn_r` and `Cn_dr` had faint minus signs and are flagged in
-  the source for visual confirmation.
+  pressure to 0.38%). All twelve lateral derivatives were subsequently confirmed
+  visually against a magnified crop of page 221, so nothing remains unverified.
 
 ## Development methodology
 

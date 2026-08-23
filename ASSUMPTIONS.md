@@ -170,10 +170,9 @@ against the transcription: lift equals weight to 0.20%, Mach reconciles with air
 and altitude to 0.00%, dynamic pressure to 0.38%, and `Zw` implied by Table IX-2 agrees
 with Table IX-4 to 1.52%.
 
-**Outstanding:** `Cn_r` and `Cn_dr` had faint minus signs in the scan. Both are set
-negative because yaw damping and rudder yawing moment must be, and Table IX-1 shows them
-unambiguously negative — but this has **not yet been confirmed by eye against page 221**
-and is flagged in the source.
+**Resolved 2026-08-23:** all twelve lateral derivatives visually confirmed against a
+magnified crop of page 221, including the two faint minus signs. Nothing in the
+transcription is unverified.
 
 ### 5.2 One flight condition
 

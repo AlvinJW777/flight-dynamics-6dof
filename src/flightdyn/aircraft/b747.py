@@ -189,10 +189,10 @@ FC2_LONGITUDINAL = LongitudinalDerivatives(
 )
 
 #: Table IX-2 (PDF p. 221). Per radian.
-#: Signs on Cn_r and Cn_dr were ambiguous in the scan (the minus renders faintly);
-#: both are set negative because yaw damping and rudder yawing moment must be, and
-#: the landing-configuration table (IX-1) shows them unambiguously negative.
-#: FLAG FOR VISUAL CHECK.
+#: **All twelve values visually confirmed against the page image, 2026-08-23.**
+#: Cn_r and Cn_dr render faintly in the scan's text layer and were initially set
+#: negative from physics alone; a magnified crop of the page confirms both are
+#: negative as assumed. No value in this block is now unverified.
 FC2_LATERAL = LateralDerivatives(
     Cy_beta=-0.96,
     Cl_beta=-0.221,

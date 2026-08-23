@@ -203,8 +203,7 @@ likely transcription error.
   just of this work.
 - **Large-amplitude or post-stall behaviour.** The linear aerodynamic model forbids it,
   and the code warns rather than extrapolating.
-- **`Cn_r` and `Cn_dr` signs**, which remain to be confirmed by eye against page 221 of
-  the scan.
+
 
 ---
 
