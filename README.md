@@ -82,7 +82,7 @@ is the entire argument for keeping verification and validation as separate evide
 alpha    = 5.520 deg      (CR-2144 Table IX-3 publishes 5.70 deg, independently)
 elevator = 1.749 deg
 throttle = 0.277
-max residual = 1.14e-16
+max residual = 3.6e-15
 ```
 
 Trim is a nonlinear root-find: three unknowns driving `u̇ = ẇ = q̇ = 0`. Proven three
