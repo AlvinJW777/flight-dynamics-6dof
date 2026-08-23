@@ -8,7 +8,11 @@
 > Each question lists what a complete answer covers. That's a checklist, not the
 > answer. Writing it yourself is the entire point.
 
-**Status:** Units 0–2 code complete. Answers below outstanding.
+**Status:** Units 0–2 complete, outcomes 1–3 answered.
+
+Answers are written as **the shortest version that is still correct** — a few lines
+you can reproduce cold, not prose you'll skim. If you can say these from memory,
+you own the unit. Depth sits in the source docstrings when you want it.
 
 ---
 
@@ -33,9 +37,14 @@
 
 ### 1.2 Why is the inertia tensor constant in body axes but not in Earth axes?
 
-**Your answer:**
-
-> _(write here)_
+> **I describes where the mass sits *relative to the axes*.**
+> Body axes are glued to the aircraft — the mass never moves, so I is fixed.
+> Earth axes aren't — as the aircraft turns, the same bolt lands at different
+> coordinates, so I changes.
+>
+> **Punchline:** `ω × Iω` is just `dI/dt` moved somewhere cheaper. The rotation
+> never goes away; you only choose where it appears. One cross product in body
+> axes, or a 3×3 tensor derivative every step in Earth axes.
 
 <details><summary>A complete answer covers…</summary>
 
@@ -66,9 +75,17 @@
 
 ### 2.1 What specifically fails if you integrate Euler angles instead of a quaternion?
 
-**Your answer:**
-
-> _(write here)_
+> **You can't cover a globe with one flat map** — at the poles, longitude dies.
+> Every meridian meets there, so the coordinate has no value.
+>
+> Rotations are the same, one dimension up. **Any three angles must have a pole.**
+> For 3-2-1 it's θ = ±90°, where roll and yaw become the same physical axis. The
+> equations contain `tanθ` and `1/cosθ`, so they blow up — and go stiff *before*
+> they get there.
+>
+> Change the sequence and you move the pole, never remove it.
+> **Quaternions use 4 numbers with one constraint, so there's no flat grid to
+> fold.** Cost: one redundant number and a normalisation.
 
 <details><summary>A complete answer covers…</summary>
 
@@ -100,9 +117,17 @@
 
 ### 3.1 Derive `u̇ = Fx/m + rv − qw` from first principles.
 
-**Your answer:**
-
-> _(write here)_
+> 1. Newton only holds in a **non-rotating** frame: `F = m(dv/dt)_inertial`
+> 2. We want body axes, but the body frame rotates.
+> 3. **Bridge — transport theorem:** `(dA/dt)_inertial = (dA/dt)_body + ω × A`
+>    *Why:* a vector painted on the wing is fixed to you, but its tip sweeps at
+>    `ω × A` to someone on the ground.
+> 4. Sub in and rearrange: `(dv/dt)_body = F/m − ω × v`
+> 5. Expand `ω × v = [qw−rv, ru−pw, pv−qu]`, take the first component:
+>
+> `u̇ = Fx/m + rv − qw`  ∎
+>
+> **Those terms aren't corrections. They *are* "the body frame rotates."**
 
 <details><summary>A complete answer covers…</summary>
 
@@ -116,9 +141,15 @@
 
 ### 3.2 Why is the intermediate-axis spin unstable?
 
-**Your answer:**
-
-> _(write here)_
+> Torque-free Euler equations, spin fast about one axis, perturb the other two.
+> Each perturbation drives the other, and stability comes down to **the sign of
+> the product of two inertia differences**.
+>
+> With I₁ < I₂ < I₃, spinning about the **intermediate** axis makes both
+> coefficients negative → product positive → **exponential growth**.
+> About the major or minor axis, one flips sign → product negative → oscillation.
+>
+> That's the whole Dzhanibekov effect: one sign.
 
 <details><summary>A complete answer covers…</summary>
 
