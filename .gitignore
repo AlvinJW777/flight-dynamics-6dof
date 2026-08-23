@@ -18,3 +18,6 @@ Thumbs.db
 
 # Extracted page images - regenerate from the PDF with scripts/
 references/pages/
+
+# generated, but committed so the repo is viewable without running anything
+!visualiser.html
