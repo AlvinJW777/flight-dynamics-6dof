@@ -15,3 +15,6 @@ references/*.pdf
 
 Thumbs.db
 .DS_Store
+
+# Extracted page images - regenerate from the PDF with scripts/
+references/pages/
